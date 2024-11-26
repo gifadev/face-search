@@ -6,6 +6,9 @@ from app.person_service import PersonService
 from app.person_repository import PersonRepository
 import os
 from fastapi.staticfiles import StaticFiles
+import uuid
+import socket
+
 
 # Inisialisasi FastAPI
 app = FastAPI()
@@ -15,10 +18,24 @@ es_db = Util.get_connection()
 person_repo = PersonRepository(es_db, Util.get_index_name())
 person_service = PersonService(person_repo)
 
+
 # Folder untuk menyimpan file gambar
 DATASET_FOLDER = "dataset/persons"
 os.makedirs(DATASET_FOLDER, exist_ok=True)
 
+#mounting untuk folder foto
+app.mount("/images", StaticFiles(directory="dataset/persons"), name="images")
+
+def get_active_ip() -> str:
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0)
+        s.connect(('8.8.8.8', 80))  # Menghubungkan ke DNS Google
+        ip_address = s.getsockname()[0]  # Mengambil IP dari koneksi aktif
+        s.close()
+        return ip_address
+    except Exception as e:
+        raise Exception(f"Gagal mendapatkan IP aktif: {e}")
 
 @app.post("/register/")
 async def register_person_api(
@@ -47,14 +64,20 @@ async def register_person_api(
         marital_status: Status pernikahan.
         image: File gambar yang diunggah.
     """
-    # Simpan file gambar ke folder dataset/persons
-    image_filename = os.path.join(DATASET_FOLDER, image.filename)
-    with open(image_filename, "wb") as f:
-        f.write(await image.read())
 
+    # Get extension
+    file_extension = os.path.splitext(image.filename)[1]
+    if not file_extension:
+        return {"error": "Invalid file extension"}
+    
+    # Simpan file gambar ke folder dataset/persons
+    image_filename = f"{uuid.uuid4().hex}{file_extension}"
+    image_path = os.path.join(DATASET_FOLDER, image_filename)
+    with open(image_path, "wb") as f:
+        f.write(await image.read())
     # Siapkan data untuk disimpan
     person_data = {
-        "image_path": image_filename,
+        "image_path": image_path,
         "full_name": full_name,
         "birth_place": birth_place,
         "birth_date": birth_date,
@@ -68,7 +91,6 @@ async def register_person_api(
 
     # Registrasi ke Elasticsearch
     response = register_person(person_service, person_data)
-
     return response
 
 @app.post("/search/")
@@ -89,18 +111,22 @@ async def search_person(image: UploadFile = File(...)):
     os.remove(temp_filename)
     
     if result:
+        server_ip = get_active_ip()
+        score = result["_score"]
+        person_data = result["_source"]
+        image_url = f"http://{server_ip}:8000/images/{os.path.basename(person_data.get('image_path', ''))}"
         value = {
-            "score":result["_score"],
-            "image":result["_source"].get("image_path"),
-            "full_name":result["_source"].get("full_name"),
-            "birth_place":result["_source"].get("birth_place"),
-            "birth_date":result["_source"].get("birth_date"),
-            "address":result["_source"].get("address"),
-            "nationality":result["_source"].get("nationality"),
-            "passport_number":result["_source"].get("passport_number"),
-            "gender":result["_source"].get("gender"),
-            "national_id_number":result["_source"].get("national_id_number"),
-            "marital_status":result["_source"].get("marital_status")
+            "score":score,
+            "image":image_url,
+            "full_name":person_data.get("full_name"),
+            "birth_place":person_data.get("birth_place"),
+            "birth_date":person_data.get("birth_date"),
+            "address":person_data.get("address"),
+            "nationality":person_data.get("nationality"),
+            "passport_number":person_data.get("passport_number"),
+            "gender":person_data.get("gender"),
+            "national_id_number":person_data.get("national_id_number"),
+            "marital_status":person_data.get("marital_status")
         }
         return value
     return {"message": "Person not found"}
