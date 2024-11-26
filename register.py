@@ -16,12 +16,12 @@ Util.delete_index(es_db, Util.get_index_name())
 person_repo = PersonRepository(es_db, Util.get_index_name())
 person_service = PersonService(person_repo)
 
-# Register a sample person
-filename = "/home/me/app/image_search/image-search-people/dataset/persons/arif.jpg"
+# # Register a sample person
+# filename = "/home/me/app/image_search/image-search-people/dataset/persons/arif.jpg"
 
-display(ShowImage(filename=filename, width=300, height=300))
-person = Person(None,filename, "Arif Munawar", "Semarang", "2001-01-01","Semarang", "Indonesia", "A12345678", "Male", "987654321", "Single")
-person_service.register_person(person)
+# display(ShowImage(filename=filename, width=300, height=300))
+# person = Person(None,filename, "Arif Munawar", "Semarang", "2001-01-01","Semarang", "Indonesia", "A12345678", "Male", "987654321", "Single")
+# person_service.register_person(person)
 
 # JSON data for bulk insert
 data = '''
@@ -42,13 +42,26 @@ data = '''
     },
     {
       "people_id":"None",
-      "image_path": "//home/me/app/image_search/image-search-people/dataset/persons/gisna.png",
+      "image_path": "/home/me/app/image_search/image-search-people/dataset/persons/gisna.png",
       "full_name": "Gisna Fauzian Dermawan",
       "birth_place": "Tasikmalaya",
       "birth_date": "2003-01-01",
       "address": "Sariwangi-Tasikmalaya",
       "nationality": "Indonesia",
       "passport_number": "B12345678",
+      "gender": "Male",
+      "national_id_number": "123456789",
+      "marital_status": "Single"
+    },
+    {
+      "people_id":"None",
+      "image_path": "/home/me/app/image_search/image-search-people/dataset/persons/arif.jpg",
+      "full_name": "Arif Munawar",
+      "birth_place": "Semarang",
+      "birth_date": "2003-01-01",
+      "address": "Semarang",
+      "nationality": "Indonesia",
+      "passport_number": "C12455678",
       "gender": "Male",
       "national_id_number": "123456789",
       "marital_status": "Single"
