@@ -27,8 +27,7 @@ class PersonRepository:
             "field": field_key,
             "k": 3,
             "num_candidates": 100,
-            "query_vector": image_embedding,
-            "boost": 1000
+            "query_vector": image_embedding
         }
 
         fields = [
@@ -44,9 +43,23 @@ class PersonRepository:
                     "knn": knn,
                     "_source": fields
                 },
-                size=1
+                size=3  
             )
-            return resp
+
+            # validasi threshold
+            threshold = 0.89
+            results = [
+                hit for hit in resp['hits']['hits']
+                if hit['_score'] >= threshold
+            ]
+
+            if not results:  
+                print("No relevant results found.")
+                return None
+            
+            print(results[0]['_score'])
+            return results[0]
         except Exception as e:
             print(f"An error occurred: {e}")
             return {}
+

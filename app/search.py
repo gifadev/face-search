@@ -11,8 +11,9 @@ def search_by_image(service, filename):
     # Cari orang
     result = service.find_person_by_image(filename)
 
-    if not result['hits']['hits']:
+    if not result:
+        print("Image not recognized or not registered.")
         return None
 
-    person_data = result['hits']['hits'][0]['_source']
-    return person_data
+    print("Person data found:", result)
+    return result

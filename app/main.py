@@ -5,7 +5,7 @@ from app.util import Util
 from app.person_service import PersonService
 from app.person_repository import PersonRepository
 import os
-from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
 
 # Inisialisasi FastAPI
 app = FastAPI()
@@ -89,5 +89,19 @@ async def search_person(image: UploadFile = File(...)):
     os.remove(temp_filename)
     
     if result:
-        return result
+        value = {
+            "score":result["_score"],
+            "image":result["_source"].get("image_path"),
+            "full_name":result["_source"].get("full_name"),
+            "birth_place":result["_source"].get("birth_place"),
+            "birth_date":result["_source"].get("birth_date"),
+            "address":result["_source"].get("address"),
+            "nationality":result["_source"].get("nationality"),
+            "passport_number":result["_source"].get("passport_number"),
+            "gender":result["_source"].get("gender"),
+            "national_id_number":result["_source"].get("national_id_number"),
+            "marital_status":result["_source"].get("marital_status")
+        }
+        return value
     return {"message": "Person not found"}
+
