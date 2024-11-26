@@ -1,6 +1,6 @@
 from typing import List, Dict
 from elasticsearch import Elasticsearch
-from util import Util  # Pastikan util.py ada di direktori yang sama
+from app.util import Util  # Pastikan util.py ada di direktori yang sama
 
 class PersonRepository:
     def __init__(self, es_client: Elasticsearch, index_name: str = "people-image-index"):
@@ -32,7 +32,7 @@ class PersonRepository:
         }
 
         fields = [
-            "people_id", "full_name", "birth_place", "birth_date",
+            "full_name", "birth_place", "birth_date",
             "address", "nationality", "passport_number",
             "gender", "national_id_number", "marital_status", "image_path"
         ]

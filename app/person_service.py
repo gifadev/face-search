@@ -1,6 +1,6 @@
 from typing import List 
-from person_repository import PersonRepository
-from person import Person
+from app.person_repository import PersonRepository
+from app.person import Person
 
 class PersonService:
     def __init__(self, person_repository: PersonRepository):

@@ -1,4 +1,4 @@
-from elasticsearch import Elasticsearch, exceptions as es_exceptions
+from elasticsearch import Elasticsearch
 import getpass
 
 class Util:
@@ -27,9 +27,6 @@ class Util:
                         "dims": 512,
                         "index": True,
                         "similarity": "cosine"
-                    },
-                    "people_id": {
-                        "type": "keyword"
                     },
                     "full_name": {
                         "type": "keyword"
